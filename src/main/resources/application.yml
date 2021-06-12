@@ -1,5 +1,86 @@
 micronaut:
   application:
     name: eplansrv
+  server:
+    port: 80
+    cors:
+      enabled: true
+    netty:
+      worker:
+        threads: 8
+      childOptions: true
+    max-request-size: '100MB'
+    multipart:
+      max-file-size: '100MB'
+  router:
+    static-resources:
+      default:
+        paths: file:../eplanui/dist
+#        paths: file:/USR/DEV/VMailerVUE/packages/VMailerVUE/dist
+        mapping: /**
+        enabled: true
   security:
-    authentication: session
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: 'pleaseChangeThisSecretForANewOne'
+        generator:
+          refresh-token:
+            secret: 'pleaseChangeThisSecretForANewOne'
+    endpoints:
+      login:
+        enabled: true
+        path: /api/login
+      logout:
+        enabled: true
+        path: /api/logout
+    intercept-url-map:
+      - pattern: /**
+        access:
+          - isAnonymous()
+    ldap:
+      default:
+        context:
+          server: 'ldaps://ldap.learn.berufskolleg-geilenkirchen.de:636'
+          managerDn: 'cn=readonly,dc=bkest,dc=schule'
+          managerPassword: 'QkpQhz5V3yd0CaOF3Lr1'
+        search:
+          base: "dc=bkest,dc=schule"
+          filter: "(cn={0})"
+        groups:
+          enabled: true
+          filter: "(member={0})"
+          attribute: "cn"
+          base: "dc=bkest,dc=schule"
+
+datasources:
+  default:
+    url: jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ''
+    schema-generate: CREATE_DROP
+    dialect: H2
+
+jpa:
+  default:
+    entity-scan:
+      packages: 'de.bkgk'
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: update
+        show_sql: true
+
+logger:
+  levels:
+    'de.bkgk': DEBUG
+    'io.micronaut.security': INFO
+    'io.micronaut.http': INFO
+    'io.micronaut.context': INFO
+    'io.micronaut.core': INFO
+
+

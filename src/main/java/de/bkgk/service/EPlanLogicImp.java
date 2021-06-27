@@ -64,8 +64,40 @@ public class EPlanLogicImp implements EPlanLogic {
      */
 
     @Override
+    public void delete(Long id){
+        Optional<EPlan> oe = ePlanRep.find(id);
+        if(oe.isPresent()){
+            String ber = oe.get().getBereich();
+            ePlanRep.delete(id);
+            renumberBereich(EPLAN.SCHULE, ber);
+        }
+    }
+
+    @Override
+    public void duplicate(Long id){
+        Optional<EPlan> oe = ePlanRep.find(id);
+        if(oe.isPresent()){
+            String ber = oe.get().getBereich();
+            ePlanRep.duplicate(oe.get());
+            renumberBereich(EPLAN.SCHULE, ber);
+        }
+    }
+
+    private void renumberBereich(String schule, String bereich){
+        List<EPlan> lep = ePlanRep.findBySchuleAndBereichOrderByNo(schule, bereich);
+
+        int no = 1;
+
+        for(EPlan n : lep){
+            n.setNo(no++);
+            ePlanRep.update(n);
+        }
+
+    }
+
+    @Override
     public List<EPlan> getEPlan(String bereich){
-        return ePlanRep.findBySchuleAndBereich(EPLAN.SCHULE, bereich);
+        return ePlanRep.findBySchuleAndBereichOrderByNo(EPLAN.SCHULE, bereich);
     }
 
     @Override
@@ -78,7 +110,7 @@ public class EPlanLogicImp implements EPlanLogic {
             EPlanSummen eps = epsMap.get(kuk);
             if(eps == null){
 //                eps = new EPlanSummen(k.getKuerzel(), k, new HashMap<String,Double>(), 0.0, k.getSoll(), 0.0);
-                List<EPlan> kukEPLs = ePlanRep.findBySchuleAndLehrer(EPLAN.SCHULE, kuk);
+                List<EPlan> kukEPLs = ePlanRep.findBySchuleAndLehrerOrderByNo(EPLAN.SCHULE, kuk);
                 Map<String,Double> kukInBer = kukEPLs.stream()
                         .reduce(
                                 new HashMap<String,Double>(),

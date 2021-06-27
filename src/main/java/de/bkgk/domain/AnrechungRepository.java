@@ -20,7 +20,7 @@ public abstract class AnrechungRepository implements CrudRepository<Anrechnung, 
     private Double[][] dData = null;
 
     public PivotTable getAnrechnungPivot(){
-        if(dData == null ){
+        if(dData == null  || dData.length == 0){
             calcAnrechnungPivot();
         }
         if(anrPivot == null ){
@@ -43,38 +43,40 @@ public abstract class AnrechungRepository implements CrudRepository<Anrechnung, 
     }
 
     public void calcAnrechnungPivot(){
-        List<String> kukl = StreamSupport.stream(findAll().spliterator(),false)
-                .map( Anrechnung::getLehrer )
-                .distinct()
-                .sorted()
-                .collect(Collectors.toList());
-        kuka = kukl.toArray(new String[0]);
+        if(count() != 0){
+            List<String> kukl = StreamSupport.stream(findAll().spliterator(),false)
+                    .map( Anrechnung::getLehrer )
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.toList());
+            kuka = kukl.toArray(new String[0]);
 
-        List<String> anrl = StreamSupport.stream(findAll().spliterator(),false)
-                .map( Anrechnung::getGrund )
-                .distinct()
-                .sorted()
-                .collect(Collectors.toList());
-        anra = anrl.toArray(new String[0]);
+            List<String> anrl = StreamSupport.stream(findAll().spliterator(),false)
+                    .map( Anrechnung::getGrund )
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.toList());
+            anra = anrl.toArray(new String[0]);
 
-        dData = new Double[kuka.length][anra.length+1];
+            dData = new Double[kuka.length][anra.length+1];
 
-        for(int r = 0; r < kuka.length; r++){
-            for(int c = 0; c < anra.length+1; c++) {
-                dData[r][c] = 0.0;
+            for(int r = 0; r < kuka.length; r++){
+                for(int c = 0; c < anra.length+1; c++) {
+                    dData[r][c] = 0.0;
+                }
             }
+
+            findAll().forEach(a -> {
+                if(!a.getBeginn().isAfter(EPLAN.MINDATE) && !a.getEnde().isBefore(EPLAN.MAXDATE)){
+                    int r = kukl.indexOf(a.getLehrer());
+                    int c = anrl.indexOf(a.getGrund())+1;
+                    dData[r][c] += a.getWwert();
+                    dData[r][0] += a.getWwert();
+                }
+            });
+
+            anrPivot = null;
         }
-
-        findAll().forEach(a -> {
-            if(!a.getBeginn().isAfter(EPLAN.MINDATE) && !a.getEnde().isBefore(EPLAN.MAXDATE)){
-                int r = kukl.indexOf(a.getLehrer());
-                int c = anrl.indexOf(a.getGrund())+1;
-                dData[r][c] += a.getWwert();
-                dData[r][0] += a.getWwert();
-            }
-        });
-
-        anrPivot = null;
     }
 
     private void genStringPivot(){

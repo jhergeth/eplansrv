@@ -69,8 +69,9 @@ public class DomainController extends BaseController{
 
     @Get("/lehrer")
     Iterable<Kollege> getKollegen() {
-        LOG.info("Fetching Kollegenliste");
-        return kollegeRepository.findAll();
+        Iterable<Kollege> ko = kollegeRepository.findAll();
+        LOG.info("Fetching Kollegenliste, size: {}", Iterables.size(ko) );
+        return ko;
     }
 
     @Post(value = "/lehrer/upload", consumes = MULTIPART_FORM_DATA, produces = TEXT_PLAIN)
@@ -80,8 +81,9 @@ public class DomainController extends BaseController{
 
     @Get("/anrechnungen")
     Iterable<Anrechnung> getAnrechnungen() {
-        LOG.info("Fetching Anrechnungsliste");
-        return anrechungRepository.findAll();
+        Iterable<Anrechnung> ko = anrechungRepository.findAll();
+        LOG.info("Fetching Anrechnungen, size: {}", Iterables.size(ko) );
+        return ko;
     }
 
     @Get("/anrechnungpivot")
@@ -97,4 +99,5 @@ public class DomainController extends BaseController{
         anrechungRepository.calcAnrechnungPivot();
         return res;
     }
+
 }

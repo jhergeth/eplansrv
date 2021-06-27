@@ -63,7 +63,23 @@ public class EplanController   extends BaseController {
     @RolesAllowed({"EPlan"})
     public HttpResponse<String> uploadRow(@Body EPlan row) {
         LOG.info("Got new data {}", row);
-        ePlanRepository.save(row);
+        ePlanRepository.update(row);
+        return HttpResponse.ok();
+    }
+
+    @Post(value="/duplicate")
+    @RolesAllowed({"EPlan"})
+    public HttpResponse<String> duplicateRow(Long id) {
+        LOG.info("Duplicate row {}", id);
+        ePlanLogic.duplicate(id);
+        return HttpResponse.ok();
+    }
+
+    @Post(value="/delete")
+    @RolesAllowed({"EPlan"})
+    public HttpResponse<String> deleteRow(Long id) {
+        LOG.info("Delete row {}", id);
+        ePlanLogic.delete(id);
         return HttpResponse.ok();
     }
 
@@ -76,21 +92,21 @@ public class EplanController   extends BaseController {
     @RolesAllowed({"EPlan"})
     List<EPlan> getLehrer(@NotNull String val){
         LOG.info("Fetching EPlan for KuK {}", val);
-        return ePlanRepository.findBySchuleAndLehrer(EPLAN.SCHULE, val);
+        return ePlanRepository.findBySchuleAndLehrerOrderByNo(EPLAN.SCHULE, val);
     }
 
     @Get("/klasse/{val}")
     @RolesAllowed({"EPlan"})
     List<EPlan> getKlasse(@NotNull String val){
         LOG.info("Fetching EPlan for Klasse {}", val);
-        return ePlanRepository.findBySchuleAndKlasse(EPLAN.SCHULE, val);
+        return ePlanRepository.findBySchuleAndKlasseOrderByNo(EPLAN.SCHULE, val);
     }
 
     @Get("/fach/{val}")
     @RolesAllowed({"EPlan"})
     List<EPlan> getFach(@NotNull String val){
         LOG.info("Fetching EPlan for Fach {}", val);
-        return ePlanRepository.findBySchuleAndFach(EPLAN.SCHULE, val);
+        return ePlanRepository.findBySchuleAndFachOrderByNo(EPLAN.SCHULE, val);
     }
 
 
